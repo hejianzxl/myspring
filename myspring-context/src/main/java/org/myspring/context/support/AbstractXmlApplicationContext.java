@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.myspring.context.AbstractApplicationContext;
 import org.myspring.context.MyApplicationContext;
-import com.july.beans.MyListableBeanFactory;
-import com.july.beans.factory.ListableBeanFactory;
+import com.july.beans.factory.MyListableBeanFactory;
 import com.july.beans.factory.xml.XmlBeanFactory;
 
 /**
@@ -16,7 +15,7 @@ import com.july.beans.factory.xml.XmlBeanFactory;
  */
 public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext {
 	/** Default BeanFactory for this context */
-	private ListableBeanFactory listableBeanFactory;
+	private MyListableBeanFactory listableBeanFactory;
 
 	public AbstractXmlApplicationContext() {
 	}

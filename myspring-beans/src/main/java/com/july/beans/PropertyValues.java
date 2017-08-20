@@ -8,4 +8,5 @@ public abstract interface PropertyValues {
 	public abstract PropertyValue getPropertyValue(String paramString);
 
 	public abstract PropertyValues changesSince(PropertyValues paramPropertyValues);
+	
 }

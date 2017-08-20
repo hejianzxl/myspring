@@ -5,15 +5,12 @@ import java.io.InputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import com.interface21.beans.factory.BeanDefinitionStoreException;
 import com.july.beans.MutablePropertyValues;
 import com.july.beans.PropertyValue;
 import com.july.beans.PropertyValues;
@@ -122,12 +119,13 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 		//解析element beanDefinition
 		beanDefinition = parseBeanDefinition(element, id, pvs);
 		//注册beanDefinition  ListableBeanFactoryImpl实现
+		
 		registerBeanDefinition(id, beanDefinition);
 		
 		String name = element.getAttribute(NAME_ATTRIBUTE);
 		if (name != null && !"".equals(name)) {
 			//注册别名
-			registerAlias(id, name);
+			//registerAlias(id, name);
 		}
 	}
 	
@@ -139,11 +137,14 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 	 * @return
 	 */
 	private AbstractBeanDefinition parseBeanDefinition(Element el, String beanName, PropertyValues pvs) {
-		boolean isSingleton
+		String isSingleton = el.getAttribute(SINGLETON_ATTRIBUTE);
+		try {
+			return new RootBeanDefinition(Class.forName(el.getAttribute(CLASS_ATTRIBUTE)), pvs, Boolean.getBoolean(isSingleton));
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null;
 		
-		
-		RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(clazz, pvs, singleton)
-		return rootBeanDefinition;
 	}
 	
 	

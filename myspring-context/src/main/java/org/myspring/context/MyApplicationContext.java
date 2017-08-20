@@ -3,7 +3,7 @@ package org.myspring.context;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.july.beans.MyListableBeanFactory;
+import com.july.beans.factory.MyListableBeanFactory;
 
 /**
  * applicationContext上下文

@@ -35,17 +35,14 @@ public class MutablePropertyValues implements PropertyValues{
 		propertyValuesList.add(pv);
 	}
 
-	@Override
 	public PropertyValue[] getPropertyValues() {
 		return (com.july.beans.PropertyValue[]) propertyValuesList.toArray(new PropertyValue[0]);
 	}
 
-	@Override
 	public boolean contains(String propertyName) {
 		return getPropertyValue(propertyName) != null;
 	}
 
-	@Override
 	public PropertyValue getPropertyValue(String propertyName) {
 		for (int i = 0; i < propertyValuesList.size(); i++) {
 			PropertyValue pv = (PropertyValue) propertyValuesList.get(i);
@@ -59,7 +56,6 @@ public class MutablePropertyValues implements PropertyValues{
 		propertyValuesList.set(i, pv);
 	}
 
-	@Override
 	public PropertyValues changesSince(PropertyValues old) {
 		MutablePropertyValues changes = new MutablePropertyValues();
 		if (old == this)

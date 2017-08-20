@@ -1,4 +1,6 @@
-package com.july.beans;
+package com.july.beans.factory;
+
+import com.july.beans.MyBeanFactory;
 
 /**
  * 扩展beanFactory接口

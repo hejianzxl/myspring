@@ -1,8 +1,7 @@
 package com.july.beans.factory.support;
 
 import com.july.beans.MyBeanFactory;
-import com.july.beans.factory.ListableBeanFactory;
-
+import com.july.beans.factory.MyListableBeanFactory;
 
 /**
  * ListableBeanFactory实现类
@@ -10,7 +9,7 @@ import com.july.beans.factory.ListableBeanFactory;
  * @author hejian
  *
  */
-public class ListableBeanFactoryImpl extends AbstractBeanFactory implements ListableBeanFactory {
+public class ListableBeanFactoryImpl extends AbstractBeanFactory implements MyListableBeanFactory {
 
 	public ListableBeanFactoryImpl() {
 	}
@@ -73,6 +72,15 @@ public class ListableBeanFactoryImpl extends AbstractBeanFactory implements List
 	 * 待实现 实例化单列对象 并处理InitializingBean 后置处理
 	 */
 	public void preInstantiateSingletons() {
+		
+	}
+	
+	/**
+	 * TODO
+	 * @param id
+	 * @param beanDefinition
+	 */
+	public void registerBeanDefinition(String id, AbstractBeanDefinition beanDefinition) {
 		
 	}
 

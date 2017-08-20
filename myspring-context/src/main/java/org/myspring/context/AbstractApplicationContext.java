@@ -13,7 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.myspring.context.aware.ApplicationContextAware;
-import com.july.beans.MyListableBeanFactory;
+
+import com.july.beans.factory.MyListableBeanFactory;
 
 public abstract class AbstractApplicationContext {
 
