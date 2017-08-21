@@ -15,6 +15,7 @@ import com.july.beans.MutablePropertyValues;
 import com.july.beans.PropertyValue;
 import com.july.beans.PropertyValues;
 import com.july.beans.factory.support.AbstractBeanDefinition;
+import com.july.beans.factory.support.ChildBeanDefinition;
 import com.july.beans.factory.support.ListableBeanFactoryImpl;
 import com.july.beans.factory.support.RootBeanDefinition;
 import com.july.beans.utils.StringUtils;
@@ -137,14 +138,36 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 	 * @return
 	 */
 	private AbstractBeanDefinition parseBeanDefinition(Element el, String beanName, PropertyValues pvs) {
-		String isSingleton = el.getAttribute(SINGLETON_ATTRIBUTE);
-		try {
-			return new RootBeanDefinition(Class.forName(el.getAttribute(CLASS_ATTRIBUTE)), pvs, Boolean.getBoolean(isSingleton));
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+		String classname = null;
+		boolean singleton = true;
+		String parent = null;
+		//解析单列属性
+		if(el.hasAttribute(SINGLETON_ATTRIBUTE)) {
+			singleton = TRUE_ATTRIBUTE_VALUE.equals(el.getAttribute(SINGLETON_ATTRIBUTE));
 		}
-		return null;
 		
+		try {
+			if(el.hasAttribute(CLASS_ATTRIBUTE)) {
+				classname = el.getAttribute(CLASS_ATTRIBUTE);
+			}
+			if (el.hasAttribute(PARENT_ATTRIBUTE)) {
+				parent = el.getAttribute(PARENT_ATTRIBUTE);
+			}
+			
+			if (classname == null && parent == null)
+				throw new RuntimeException("No classname or parent in bean definition [" + beanName + "]", null);
+			//classname 标签属性  初始化并返回RootBeanDefinition
+			if (classname != null) {
+				ClassLoader cl = Thread.currentThread().getContextClassLoader();
+				return new RootBeanDefinition(Class.forName(classname, true, cl), pvs, singleton);
+			}else {
+				//子节点属性  TODO
+				return new ChildBeanDefinition(parent, pvs, singleton);
+			}
+			
+		}catch (ClassNotFoundException ex) {
+			throw new RuntimeException("Error creating bean with name [" + beanName + "]: class '" + classname + "' not found", ex);
+		}
 	}
 	
 	
