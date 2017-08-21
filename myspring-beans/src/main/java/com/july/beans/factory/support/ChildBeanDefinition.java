@@ -15,4 +15,14 @@ public class ChildBeanDefinition extends AbstractBeanDefinition{
 		super(pvs, singleton);
 		this.parentName = parentName;
 	}
+	
+	public String getParentName() {
+		return parentName;
+	}
+	
+	public boolean equals(Object arg0) {
+		if (!(arg0 instanceof ChildBeanDefinition))
+			return false;
+		return super.equals(arg0) && ((ChildBeanDefinition) arg0).getParentName().equals(this.getParentName());
+	}
 }

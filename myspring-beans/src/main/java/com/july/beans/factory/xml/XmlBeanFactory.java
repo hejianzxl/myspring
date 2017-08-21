@@ -1,5 +1,6 @@
 package com.july.beans.factory.xml;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.xml.parsers.DocumentBuilder;
@@ -12,6 +13,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import com.july.beans.MutablePropertyValues;
+import com.july.beans.MyBeanFactory;
 import com.july.beans.PropertyValue;
 import com.july.beans.PropertyValues;
 import com.july.beans.factory.support.AbstractBeanDefinition;
@@ -62,13 +64,32 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 
 	private static final String PROP_ELEMENT = "prop";
 
+	public XmlBeanFactory(String filename, MyBeanFactory parentBeanFactory) throws Exception {
+		super(parentBeanFactory);
+		try {
+			logger.info("Loading XmlBeanFactory from file '" + filename + "'");
+			
+			loadBeanDefinitions(new FileInputStream(filename));
+		}
+		catch (IOException ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Can't open file [" + filename + "]", ex);
+		}
+	}
+	
+	public XmlBeanFactory(String filename) throws Exception {
+		this(filename, null);
+	}
+	
 	public XmlBeanFactory(InputStream is) {
 		loadBeanDefinitions(is);
 	}
 
 	private void loadBeanDefinitions(InputStream is) {
+		logger.info("Loading XmlBeanFactory from InputStream [" + is + "]");
 		//创建document解析工厂
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setValidating(true);
         //创建document解析器
 		try {
 			DocumentBuilder db = dbf.newDocumentBuilder();
@@ -92,8 +113,8 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 			logger.warn("load beanDefinitions parse document is fail");
 			return;
 		}
-		
-		NodeList nl = document.getElementsByTagName("beans");
+		logger.debug("Loading bean definitions");
+		NodeList nl = document.getElementsByTagName(BEAN_ELEMENT);
 		
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node n = nl.item(i);
@@ -145,6 +166,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 			singleton = TRUE_ATTRIBUTE_VALUE.equals(el.getAttribute(SINGLETON_ATTRIBUTE));
 		}
 		
+		System.out.println( "parse element tag" + el.getTagName());
 		try {
 			if(el.hasAttribute(CLASS_ATTRIBUTE)) {
 				classname = el.getAttribute(CLASS_ATTRIBUTE);
@@ -160,7 +182,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 				ClassLoader cl = Thread.currentThread().getContextClassLoader();
 				return new RootBeanDefinition(Class.forName(classname, true, cl), pvs, singleton);
 			}else {
-				//子节点属性  TODO
+				//子节点属性
 				return new ChildBeanDefinition(parent, pvs, singleton);
 			}
 			

@@ -1,8 +1,9 @@
 package com.july.beans.factory.support;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-
+import java.util.Set;
 import com.july.beans.MyBeanFactory;
 import com.july.beans.factory.MyListableBeanFactory;
 
@@ -26,6 +27,19 @@ public class ListableBeanFactoryImpl extends AbstractBeanFactory implements MyLi
 	}
 
 	public Object getBean(String name) {
+		Object object = null;
+		AbstractBeanDefinition bd = getBeanDefinition(name);
+		
+		if (bd instanceof RootBeanDefinition) {
+			RootBeanDefinition rbd = (RootBeanDefinition) bd;
+			try {
+				return rbd.getBeanClass().newInstance();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
 		return null;
 	}
 
@@ -50,7 +64,14 @@ public class ListableBeanFactoryImpl extends AbstractBeanFactory implements MyLi
 	}
 
 	public String[] getBeanDefinitionNames() {
-		return null;
+		Set keys = beanDefinitionHash.keySet();
+		String[] names = new String[keys.size()];
+		Iterator itr = keys.iterator();
+		int i = 0;
+		while (itr.hasNext()) {
+			names[i++] = (String) itr.next();
+		}
+		return names;
 	}
 
 	public String[] getBeanDefinitionNames(Class paramClass) {
@@ -65,8 +86,7 @@ public class ListableBeanFactoryImpl extends AbstractBeanFactory implements MyLi
 
 	@Override
 	protected RootBeanDefinition getBeanDefinition(String beanName) {
-		// TODO Auto-generated method stub
-		return null;
+		return (RootBeanDefinition) beanDefinitionHash.get(beanName);
 	}
 
 	@Override
@@ -83,7 +103,7 @@ public class ListableBeanFactoryImpl extends AbstractBeanFactory implements MyLi
 	}
 	
 	/**
-	 * TODO
+	 * definition bean map
 	 * @param id
 	 * @param beanDefinition
 	 */
