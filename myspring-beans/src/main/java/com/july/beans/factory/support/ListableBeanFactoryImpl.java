@@ -1,5 +1,8 @@
 package com.july.beans.factory.support;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.july.beans.MyBeanFactory;
 import com.july.beans.factory.MyListableBeanFactory;
 
@@ -10,8 +13,12 @@ import com.july.beans.factory.MyListableBeanFactory;
  *
  */
 public class ListableBeanFactoryImpl extends AbstractBeanFactory implements MyListableBeanFactory {
-
+	
+	//beanDefinition map
+	private Map beanDefinitionHash = new HashMap();
+	
 	public ListableBeanFactoryImpl() {
+		super();
 	}
 
 	public ListableBeanFactoryImpl(MyBeanFactory parentBeanFactory) {
@@ -80,8 +87,8 @@ public class ListableBeanFactoryImpl extends AbstractBeanFactory implements MyLi
 	 * @param id
 	 * @param beanDefinition
 	 */
-	public void registerBeanDefinition(String id, AbstractBeanDefinition beanDefinition) {
-		
+	public void registerBeanDefinition(String prototypeName, AbstractBeanDefinition beanDefinition) {
+		beanDefinitionHash.put(prototypeName, beanDefinition);
 	}
 
 }

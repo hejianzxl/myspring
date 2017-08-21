@@ -120,12 +120,11 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 		//解析element beanDefinition
 		beanDefinition = parseBeanDefinition(element, id, pvs);
 		//注册beanDefinition  ListableBeanFactoryImpl实现
-		
 		registerBeanDefinition(id, beanDefinition);
 		
 		String name = element.getAttribute(NAME_ATTRIBUTE);
 		if (name != null && !"".equals(name)) {
-			//注册别名
+			//注册别名 TODO
 			//registerAlias(id, name);
 		}
 	}
