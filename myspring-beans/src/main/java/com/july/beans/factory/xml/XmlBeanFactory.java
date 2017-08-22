@@ -1,6 +1,5 @@
 package com.july.beans.factory.xml;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.xml.parsers.DocumentBuilder;
@@ -11,6 +10,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 import com.july.beans.MutablePropertyValues;
 import com.july.beans.MyBeanFactory;
@@ -35,6 +35,10 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 	private static final String ID_ATTRIBUTE = "id";
 
 	private static final String NAME_ATTRIBUTE = "name";
+	
+	private static final String VALUE_ATTRIBUTE = "value";
+	
+	private static final String REF_ATTRIBUTE = "ref";
 
 	private static final String SINGLETON_ATTRIBUTE = "singleton";
 
@@ -69,13 +73,14 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 		try {
 			logger.info("Loading XmlBeanFactory from file '" + filename + "'");
 			
-			loadBeanDefinitions(new FileInputStream(filename));
+			loadBeanDefinitions(getResourceByPath(filename));
 		}
 		catch (IOException ex) {
 			ex.printStackTrace();
 			throw new RuntimeException("Can't open file [" + filename + "]", ex);
 		}
 	}
+	
 	
 	public XmlBeanFactory(String filename) throws Exception {
 		this(filename, null);
@@ -134,12 +139,10 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 		//解析beanId
 		String id = element.getAttribute(ID_ATTRIBUTE);
 		String beanName = element.getAttribute(NAME_ATTRIBUTE);
-		AbstractBeanDefinition beanDefinition;
-		
 		//获取element的属性
 		PropertyValues pvs = getPropertyValueSubElements(element);
 		//解析element beanDefinition
-		beanDefinition = parseBeanDefinition(element, id, pvs);
+		AbstractBeanDefinition beanDefinition = parseBeanDefinition(element, id, pvs);
 		//注册beanDefinition  ListableBeanFactoryImpl实现
 		registerBeanDefinition(id, beanDefinition);
 		
@@ -159,14 +162,12 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 	 */
 	private AbstractBeanDefinition parseBeanDefinition(Element el, String beanName, PropertyValues pvs) {
 		String classname = null;
-		boolean singleton = true;
+		boolean singleton = false;
 		String parent = null;
 		//解析单列属性
 		if(el.hasAttribute(SINGLETON_ATTRIBUTE)) {
 			singleton = TRUE_ATTRIBUTE_VALUE.equals(el.getAttribute(SINGLETON_ATTRIBUTE));
 		}
-		
-		System.out.println( "parse element tag" + el.getTagName());
 		try {
 			if(el.hasAttribute(CLASS_ATTRIBUTE)) {
 				classname = el.getAttribute(CLASS_ATTRIBUTE);
@@ -198,10 +199,13 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 	 * @return
 	 */
 	private PropertyValues getPropertyValueSubElements(Element beanEle) {
+		//获取所有property标签
 		NodeList nl = beanEle.getElementsByTagName(PROPERTY_ELEMENT);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		for (int i = 0; i < nl.getLength(); i++) {
+			//返回property节点
 			Element propEle = (Element) nl.item(i);
+			//解析property
 			parsePropertyElement(pvs, propEle);
 		}
 		return pvs;
@@ -211,9 +215,17 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 		String propertyName = e.getAttribute(NAME_ATTRIBUTE);
 		if (propertyName == null || "".equals(propertyName))
 			logger.error("Property without a name", null);
-
-		Object val = getPropertyValue(e);
-		pvs.addPropertyValue(new PropertyValue(propertyName, val));
+		
+		if(StringUtils.isNotEmpty(propertyName)) {
+			//解析value 
+			String propertyValue = e.getAttribute(VALUE_ATTRIBUTE);
+			if(StringUtils.isNotEmpty(propertyValue)) 
+			pvs.addPropertyValue(new PropertyValue(propertyName, propertyValue));
+		}
+		//解析ref
+		String propertyRef = e.getAttribute(REF_ATTRIBUTE);
+		if(StringUtils.isNotEmpty(propertyRef)) 
+		pvs.addPropertyValue(new PropertyValue(REF_ATTRIBUTE, propertyRef));
 	}
 	
 	
@@ -230,16 +242,68 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 			if (nl.item(i) instanceof Element) {
 				if (childEle != null)
 					logger.error("<property> element can have only one child element, not " + nl.getLength(), null);
-				childEle = (Element) nl.item(i);
+					childEle = (Element) nl.item(i);
 			}
 		}
-
+		if(null == childEle) {
+			return null;
+		}
 		return parsePropertySubelement(childEle);
 	}
 
-	private Object parsePropertySubelement(Element childEle) {
-		// TODO Auto-generated method stub
-		return null;
+	private Object parsePropertySubelement(Element ele) {
+		if (ele.getTagName().equals(REF_ELEMENT)) {
+			// a reference to another bean in this factory?
+			String beanName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
+			if ("".equals(beanName)) {
+				// a reference to an external bean (in a parent factory)?
+				beanName = ele.getAttribute(EXTERNAL_REF_ATTRIBUTE);
+				if ("".equals(beanName)) {
+					throw new RuntimeException("Either 'bean' or 'external' is required for a reference");
+				}
+			}
+			return new RuntimeException(beanName);
+		}
+		else if (ele.getTagName().equals(VALUE_ELEMENT)) {
+			// It's a literal value
+			return getTextValue(ele);
+		}
+		else if (ele.getTagName().equals(LIST_ELEMENT)) {
+			//return getList(ele);
+		}
+		else if (ele.getTagName().equals(MAP_ELEMENT)) {
+			//return getMap(ele);
+		}
+		else if (ele.getTagName().equals(PROPS_ELEMENT)) {
+			//return getProps(ele);
+		}
+		throw new RuntimeException("Unknown subelement of <property>: <" + ele.getTagName() + ">", null);
 	}
-
+	
+	
+	protected InputStream getResourceByPath(String path) throws IOException {
+		if (!path.startsWith("/")) {
+			// always use root,
+			// as loading relative to this class' package doesn't make sense
+			path = "/" + path;
+		}
+		return getClass().getResourceAsStream(path);
+	}
+	
+	
+	private String getTextValue(Element e) {
+		NodeList nl = e.getChildNodes();
+		if (nl.item(0) == null) {
+			// treat empty value as empty String
+			return "";
+		}
+		if (nl.getLength() != 1 || !(nl.item(0) instanceof Text)) {
+			throw new RuntimeException("Unexpected element or type mismatch: " +
+			                             "expected single node of " + nl.item(0).getClass() + " to be of type Text: "
+			                             + "found " + e, null);
+		}
+		Text t = (Text) nl.item(0);
+		// This will be a String
+		return t.getData();
+	}
 }
