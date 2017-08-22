@@ -29,4 +29,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	protected Object newBeanWrapper() throws InstantiationException, IllegalAccessException {
 		return clazz.newInstance(); 
 	}
+
+	@Override
+	public String toString() {
+		return "RootBeanDefinition [clazz=" + clazz + "]";
+	}
 }
