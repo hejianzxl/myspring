@@ -162,7 +162,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 	 */
 	private AbstractBeanDefinition parseBeanDefinition(Element el, String beanName, PropertyValues pvs) {
 		String classname = null;
-		boolean singleton = false;
+		boolean singleton = true;
 		String parent = null;
 		//解析单列属性
 		if(el.hasAttribute(SINGLETON_ATTRIBUTE)) {
