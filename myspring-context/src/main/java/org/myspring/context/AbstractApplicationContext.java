@@ -16,7 +16,7 @@ import org.myspring.context.aware.ApplicationContextAware;
 
 import com.july.beans.factory.MyListableBeanFactory;
 
-public abstract class AbstractApplicationContext {
+public abstract class AbstractApplicationContext implements MyApplicationContext{
 
 	protected final Log				logger				= LogFactory.getLog(getClass());
 	public static final String		OPTIONS_BEAN_NAME	= "contextOptions";
@@ -173,6 +173,10 @@ public abstract class AbstractApplicationContext {
 
 	public boolean isSingleton(String name) {
 		return getBeanFactory().isSingleton(name);
+	}
+	
+	public <T> boolean isSingleton(Class<T> classss) {
+		return false;
 	}
 
 	public String[] getAliases(String name) {

@@ -50,4 +50,42 @@ public class StringUtils {
 		}
 		return sb.toString();
 	}
+
+
+	public static String[] commaDelimitedListToStringArray(String locations) {
+		return delimitedListToStringArray(locations, ",");
+	}
+	
+	public static String[] delimitedListToStringArray(String s, String delimiter) {
+		if(isEmpty(s)) {
+			return null;
+		}
+		
+		if(isNotEmpty(s) && isEmpty(delimiter)) {
+			return new String[]{s};
+		}
+		
+		
+		return null;
+	}
+
+	/**
+	 * Convenience method to return a String array as a delimited (e.g. CSV)
+	 * String. Useful for toString() implementations
+	 * @param arr array to display. Elements may be of any type (toString() will be
+	 * called on each element).
+	 * @param delim delimiter to use (probably a ,)
+	 * @param parentLocations
+	 * @param separator
+	 * @return
+	 */
+	public static String arrayToDelimitedString(String[] parentLocations, String separator) {
+		StringBuilder stringBuilder = new StringBuilder();
+		if(null != parentLocations && parentLocations.length > 0){
+			for(String location : parentLocations) {
+				stringBuilder.append(location).append(separator);
+			}
+		}
+		return stringBuilder.toString();
+	}
 }

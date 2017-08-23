@@ -43,6 +43,13 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 		}
 	}
 	
+	
+	@Override
+	protected MyListableBeanFactory getBeanFactory() {
+		return listableBeanFactory;
+	}
+
+	
 	/***
 	 * 子类实现
 	 * 获取输入流

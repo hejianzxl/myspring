@@ -90,7 +90,6 @@ public abstract class AbstractBeanFactory implements MyBeanFactory {
 						singletonCache.put(transformedBeanName(name), beanObject);
 						return beanObject;
 					}
-					
 				}else {
 					beanObject = rbd.newBeanWrapper();
 				}
