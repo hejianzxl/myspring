@@ -72,7 +72,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 		super(parentBeanFactory);
 		try {
 			logger.info("Loading XmlBeanFactory from file '" + filename + "'");
-			
+			instantiateSupplementaryBean();
 			loadBeanDefinitions(getResourceByPath(filename));
 		}
 		catch (IOException ex) {
