@@ -124,7 +124,12 @@ public abstract class AbstractApplicationContext implements MyApplicationContext
 	 * @throws FileNotFoundException
 	 */
 	private InputStream getResourceByPath(String path) throws FileNotFoundException {
-		return new FileInputStream(path);
+		if (!path.startsWith("/")) {
+			// always use root,
+			// as loading relative to this class' package doesn't make sense
+			path = "/" + path;
+		}
+		return getClass().getResourceAsStream(path);
 	}
 
 	public String getResourceBasePath() {

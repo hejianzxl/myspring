@@ -33,7 +33,6 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 			if (locations.length == 0) {
 				throw new RuntimeException("At least 1 config location required");
 			}
-
 			this.configLocation = locations[locations.length - 1];
 			logger.debug("Trying to open XML application context file '" + this.configLocation + "'");
 
@@ -46,8 +45,8 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 					logger.debug("Setting parent context for locations: [" +
 											 StringUtils.arrayToDelimitedString(parentLocations, ","));
 				}
-				MyApplicationContext parent = createParentContext(parentLocations);
-				setParent(parent);
+				//MyApplicationContext parent = createParentContext(parentLocations);
+				//setParent(parent);
 			}
 			// initialize this context
 			refresh();

@@ -51,24 +51,23 @@ public class StringUtils {
 		return sb.toString();
 	}
 
-
 	public static String[] commaDelimitedListToStringArray(String locations) {
+		System.out.println(locations);
 		return delimitedListToStringArray(locations, ",");
 	}
 	
-	public static String[] delimitedListToStringArray(String s, String delimiter) {
-		if(isEmpty(s)) {
+	public static String[] delimitedListToStringArray(String locations, String delimiter) {
+		
+		if(isEmpty(locations)) {
 			return null;
 		}
 		
-		if(isNotEmpty(s) && isEmpty(delimiter)) {
-			return new String[]{s};
+		if(isNotEmpty(locations) && isNotEmpty(delimiter)) {
+			return new String[]{locations};
 		}
-		
-		
 		return null;
 	}
-
+	
 	/**
 	 * Convenience method to return a String array as a delimited (e.g. CSV)
 	 * String. Useful for toString() implementations

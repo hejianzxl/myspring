@@ -67,12 +67,10 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 	private static final String PROPS_ELEMENT = "props";
 
 	private static final String PROP_ELEMENT = "prop";
-
+	
 	public XmlBeanFactory(String filename, MyBeanFactory parentBeanFactory) throws Exception {
 		super(parentBeanFactory);
 		try {
-			logger.info("Loading XmlBeanFactory from file '" + filename + "'");
-			instantiateSupplementaryBean();
 			loadBeanDefinitions(getResourceByPath(filename));
 		}
 		catch (IOException ex) {
@@ -80,7 +78,6 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 			throw new RuntimeException("Can't open file [" + filename + "]", ex);
 		}
 	}
-	
 	
 	public XmlBeanFactory(String filename) throws Exception {
 		this(filename, null);
@@ -118,6 +115,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 			logger.warn("load beanDefinitions parse document is fail");
 			return;
 		}
+		instantiateSupplementaryBean();
 		logger.debug("Loading bean definitions");
 		NodeList nl = document.getElementsByTagName(BEAN_ELEMENT);
 		
