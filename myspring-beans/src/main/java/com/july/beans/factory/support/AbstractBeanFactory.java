@@ -5,15 +5,18 @@ import java.beans.PropertyEditorManager;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.july.beans.BeanPropertyEditor;
+import com.july.beans.BeanWrapper;
 import com.july.beans.MyBeanFactory;
 import com.july.beans.PropertyValue;
 import com.july.beans.PropertyValues;
+import com.july.beans.factory.InitializingBean;
+import com.july.beans.utils.StringUtils;
 
 public abstract class AbstractBeanFactory implements MyBeanFactory {
 
@@ -32,13 +35,25 @@ public abstract class AbstractBeanFactory implements MyBeanFactory {
 	}
 
 	private Object createBean(String name, Map newlyCreatedBeans) {
-		/*
-		 * if (newlyCreatedBeans == null) { newlyCreatedBeans = new HashMap(); }
-		 * Object bean = getBeanWrapperForNewInstance(name,
-		 * newlyCreatedBeans).getWrappedInstance();
-		 * callLifecycleMethodsIfNecessary(bean, name);
-		 */
-		return null;
+		if (newlyCreatedBeans == null) {
+			newlyCreatedBeans = new HashMap();
+		}
+		Object bean = null;
+		try {
+			bean = getBeanWrapperForNewInstance(name, newlyCreatedBeans).getWrappedInstance();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		//InitializingBean 后置处理
+		callLifecycleMethodsIfNecessary(bean, name);
+		return bean;
+	}
+
+	private void callLifecycleMethodsIfNecessary(Object bean, String name) {
+		if (bean instanceof InitializingBean) {
+		}
 	}
 
 	public Object getBean(String name) {
@@ -65,6 +80,34 @@ public abstract class AbstractBeanFactory implements MyBeanFactory {
 		return null;
 	}
 
+	private BeanWrapper getBeanWrapperForNewInstance(String name, Map newlyCreatedBeans) throws InstantiationException, IllegalAccessException {
+		logger.debug("getBeanWrapperForNewInstance (" + name + ")");
+		AbstractBeanDefinition bd = getBeanDefinition(name);
+		logger.debug("getBeanWrapperForNewInstance definition is: " + bd);
+		BeanWrapper instanceWrapper = null;
+			PropertyValues pvs = bd.getPropertyValues();
+			if (bd instanceof RootBeanDefinition) {
+				RootBeanDefinition rbd = (RootBeanDefinition) bd;
+				try {
+					instanceWrapper = rbd.getBeanWrapperForNewInstance();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} else if (bd instanceof ChildBeanDefinition) {
+				ChildBeanDefinition ibd = (ChildBeanDefinition) bd;
+				if (newlyCreatedBeans == null) {
+					newlyCreatedBeans = new HashMap();
+				}
+				instanceWrapper = getBeanWrapperForNewInstance(ibd.getParentName(), newlyCreatedBeans);
+			}
+			// return bd.isSingleton() ? getSharedInstance(name,
+			newlyCreatedBeans.put(name, instanceWrapper.getWrappedInstance());
+			// set property
+			applyPropertyValues(bd, instanceWrapper.getWrappedInstance(), pvs, name);
+			return instanceWrapper;
+			
+	}
+
 	/**
 	 * 获取单列bean对象
 	 * 
@@ -77,38 +120,45 @@ public abstract class AbstractBeanFactory implements MyBeanFactory {
 		if (newlyCreatedBeans != null && newlyCreatedBeans.containsKey(name)) {
 			return newlyCreatedBeans.get(name);
 		}
-		Object beanObject = null;
+
 		try {
 			AbstractBeanDefinition bd = getBeanDefinition(transformedBeanName(name));
-			PropertyValues pvs = bd.getPropertyValues();
-			if (bd instanceof RootBeanDefinition) {
-				RootBeanDefinition rbd = (RootBeanDefinition) bd;
-				// 简单实现单列对象创建 后续改造 TODO
-				if (rbd.isSingleton()) {
-					beanObject = singletonCache.get(transformedBeanName(name));
-					if (null == beanObject) {
-						beanObject = rbd.newBeanWrapper();
-						applyPropertyValues(bd, beanObject, pvs, name);
-						singletonCache.put(transformedBeanName(name), beanObject);
-						return beanObject;
-					}
-				} else {
-					beanObject = rbd.newBeanWrapper();
-				}
-			} else if (bd instanceof ChildBeanDefinition) {
-				ChildBeanDefinition ibd = (ChildBeanDefinition) bd;
-			}
-			// return bd.isSingleton() ? getSharedInstance(name,
-			// newlyCreatedBeans) : createBean(name, newlyCreatedBeans);
-			// set property
-			applyPropertyValues(bd, beanObject, pvs, name);
+			return bd.isSingleton() ? getSharedInstance(name, newlyCreatedBeans) : createBean(name, newlyCreatedBeans);
 		} catch (Exception ex) {
 			// not found -> check parent
 			if (this.parentBeanFactory != null)
 				return this.parentBeanFactory.getBean(name);
 			logger.error("beanInternal is error ", ex);
 		}
-		return beanObject;
+		return null;
+	}
+
+	/**
+	 * 获取单列bean
+	 * 
+	 * @param pname
+	 * @param newlyCreatedBeans
+	 * @return
+	 */
+	private Object getSharedInstance(String pname, Map newlyCreatedBeans) {
+		// 获取beanName
+		String name = transformedBeanName(pname);
+		if (StringUtils.isEmpty(name))
+			logger.info("not find bean name in transformed");
+
+		Object beanInstance = this.singletonCache.get(name);
+		if (beanInstance == null) {
+			logger.info("Cached shared instance of Singleton bean '" + name + "'");
+			if (newlyCreatedBeans == null) {
+				newlyCreatedBeans = new HashMap();
+			}
+			beanInstance = createBean(name, newlyCreatedBeans);
+			this.singletonCache.put(name, beanInstance);
+		} else {
+			if (logger.isDebugEnabled())
+				logger.debug("Returning cached instance of Singleton bean '" + name + "'");
+		}
+		return beanInstance;
 	}
 
 	private void applyPropertyValues(AbstractBeanDefinition beanDefinition, Object beanObject, PropertyValues pvs,
@@ -134,8 +184,22 @@ public abstract class AbstractBeanFactory implements MyBeanFactory {
 							logger.info("findCustomEditor propertyType " + propertyType + " value "
 									+ propertyValue.getValue());
 							PropertyEditor pe = findCustomEditor(propertyType, propertyValue.getValue());
-							pe.setAsText((String) propertyValue.getValue());
-							setMethod.invoke(beanObject, pe.getValue());
+							if(null == pe) {
+								//简单实现
+								Object refBean = singletonCache.get(propertyValue.getValue());
+								if(null == refBean) {
+									RootBeanDefinition refBd = this.getBeanDefinition((String) propertyValue.getValue());
+									refBean = refBd.newBeanWrapper().getWrappedInstance();
+									if(refBd.isSingleton()) {
+										singletonCache.put(propertyValue.getValue(), refBean);
+									}
+									applyPropertyValues(refBd, refBean, refBd.getPropertyValues(), (String)propertyValue.getValue());
+								}
+								setMethod.invoke(beanObject, refBean);
+							}else {
+								pe.setAsText((String) propertyValue.getValue());
+								setMethod.invoke(beanObject, pe.getValue());
+							}
 						}
 
 						/*
@@ -156,6 +220,8 @@ public abstract class AbstractBeanFactory implements MyBeanFactory {
 					} catch (InvocationTargetException e) {
 						e.printStackTrace();
 					} catch (NoSuchMethodException e) {
+						e.printStackTrace();
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}

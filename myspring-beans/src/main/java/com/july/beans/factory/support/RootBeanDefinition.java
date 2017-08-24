@@ -1,5 +1,7 @@
 package com.july.beans.factory.support;
 
+import com.july.beans.BeanWrapper;
+import com.july.beans.BeanWrapperImpl;
 import com.july.beans.PropertyValues;
 
 public class RootBeanDefinition extends AbstractBeanDefinition {
@@ -26,12 +28,17 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		return this.clazz;
 	}
 
-	protected Object newBeanWrapper() throws InstantiationException, IllegalAccessException {
-		return clazz.newInstance(); 
+	protected BeanWrapper newBeanWrapper() throws Exception {
+		return new BeanWrapperImpl(getBeanClass());
 	}
 
 	@Override
 	public String toString() {
 		return "RootBeanDefinition [clazz=" + clazz + "]";
+	}
+
+	public BeanWrapper getBeanWrapperForNewInstance() throws Exception {
+		BeanWrapper bw = newBeanWrapper();
+		return bw;
 	}
 }

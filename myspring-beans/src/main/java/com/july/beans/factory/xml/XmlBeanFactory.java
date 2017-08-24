@@ -143,7 +143,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 		AbstractBeanDefinition beanDefinition = parseBeanDefinition(element, id, pvs);
 		//注册beanDefinition  ListableBeanFactoryImpl实现
 		registerBeanDefinition(id, beanDefinition);
-		
+		beanDefinition.setPropertyValues(pvs);
 		String name = element.getAttribute(NAME_ATTRIBUTE);
 		if (name != null && !"".equals(name)) {
 			//注册别名 TODO
@@ -213,17 +213,17 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl{
 		String propertyName = e.getAttribute(NAME_ATTRIBUTE);
 		if (propertyName == null || "".equals(propertyName))
 			logger.error("Property without a name", null);
-		
+		//解析ref
+		String propertyRef = e.getAttribute(REF_ATTRIBUTE);
 		if(StringUtils.isNotEmpty(propertyName)) {
 			//解析value 
 			String propertyValue = e.getAttribute(VALUE_ATTRIBUTE);
-			if(StringUtils.isNotEmpty(propertyValue)) 
-			pvs.addPropertyValue(new PropertyValue(propertyName, propertyValue));
+			if(StringUtils.isNotEmpty(propertyValue)) {
+				pvs.addPropertyValue(new PropertyValue(propertyName, propertyValue));
+			}else {
+				pvs.addPropertyValue(new PropertyValue(propertyName, propertyRef));
+			}
 		}
-		//解析ref
-		String propertyRef = e.getAttribute(REF_ATTRIBUTE);
-		if(StringUtils.isNotEmpty(propertyRef)) 
-		pvs.addPropertyValue(new PropertyValue(REF_ATTRIBUTE, propertyRef));
 	}
 	
 	
