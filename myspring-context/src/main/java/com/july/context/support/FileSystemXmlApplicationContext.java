@@ -1,9 +1,10 @@
-package org.myspring.context.support;
+package com.july.context.support;
 
 import java.io.IOException;
 import java.io.InputStream;
-import org.myspring.context.MyApplicationContext;
+
 import com.july.beans.utils.StringUtils;
+import com.july.context.MyApplicationContext;
 
 
 /**

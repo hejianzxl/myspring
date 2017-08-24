@@ -1,4 +1,4 @@
-package org.myspring.webmvc;
+package com.july.core;
 
 /**
  * Hello world!

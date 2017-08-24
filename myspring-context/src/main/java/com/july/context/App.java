@@ -1,4 +1,4 @@
-package org.myspring.core;
+package com.july.context;
 
 /**
  * Hello world!

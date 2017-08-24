@@ -1,6 +1,6 @@
-package org.myspring.context.aware;
+package com.july.context.aware;
 
-import org.myspring.context.AbstractApplicationContext;
+import com.july.context.AbstractApplicationContext;
 
 /**
  * ApplicationContextAware

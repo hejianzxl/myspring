@@ -1,4 +1,4 @@
-package org.myspring.context;
+package com.july.context;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,11 +1,12 @@
-package org.myspring.context.support;
+package com.july.context.support;
 
 import java.io.IOException;
 import java.io.InputStream;
-import org.myspring.context.AbstractApplicationContext;
-import org.myspring.context.MyApplicationContext;
+
 import com.july.beans.factory.MyListableBeanFactory;
 import com.july.beans.factory.xml.XmlBeanFactory;
+import com.july.context.AbstractApplicationContext;
+import com.july.context.MyApplicationContext;
 
 /**
  * 抽象AbstractApplicationContext

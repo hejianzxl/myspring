@@ -1,4 +1,4 @@
-package org.myspring.context;
+package com.july.context;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,9 +12,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.myspring.context.aware.ApplicationContextAware;
 
 import com.july.beans.factory.MyListableBeanFactory;
+import com.july.context.aware.ApplicationContextAware;
 
 public abstract class AbstractApplicationContext implements MyApplicationContext{
 

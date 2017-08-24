@@ -1,4 +1,4 @@
-package org.myspring.spring.web;
+package com.july.web;
 
 /**
  * Hello world!
